@@ -1,0 +1,18 @@
+{
+  "name": "hw1_rbpo",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@10.0.0",
+  "scripts": {
+    "dev": "pnpm build && node --watch dist/src/main.js",
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "start": "node --enable-source-maps dist/src/main.js",
+    "test": "tsc -p tsconfig.tests.json && node .test-dist/test/run-tests.js"
+  },
+  "devDependencies": {
+    "@types/node": "^22.18.1",
+    "typescript": "^5.9.2"
+  }
+}
