@@ -1,15 +1,14 @@
 # HW1_RBPO: Notes Service
 
-Минимальный веб-API сервиса личных заметок для EK1 по РБПО.
+Проект для EK1 по РБПО: минимальный веб-API сервиса личных заметок с развернутой концепцией безопасности.
 
-## Возможности
+## Что это за продукт
 
-- healthcheck сервиса;
-- создание заметки с заголовком, текстом и тегами;
-- получение списка заметок;
-- получение, обновление и удаление заметки по `id`;
-- bearer-token авторизация для всех операций с заметками;
-- валидация входных данных и единый JSON-формат ошибок.
+Notes Service - это backend для хранения личных текстовых заметок. Пользователь может создать заметку, посмотреть список своих заметок, открыть конкретную заметку, обновить ее поля, архивировать или удалить запись.
+
+На EK1 реализована минимальная техническая основа, а не полный production-продукт. API работает локально, хранит данные в памяти процесса и показывает ключевую границу доверия: недоверенный HTTP-запрос должен пройти авторизацию, проверку входных данных и owner-scoped доступ к заметкам.
+
+Главная ценность продукта - содержимое личных заметок. Поэтому центральная линия безопасности: нельзя читать, изменять или удалять заметки без авторизации, а входные данные должны проверяться до попадания в хранилище.
 
 ## Быстрый старт
 
@@ -18,13 +17,20 @@
 - Node.js 22+;
 - pnpm 10.x.
 
+Установка и сборка:
+
 ```bash
 pnpm install
 pnpm build
+```
+
+Запуск в Linux/macOS:
+
+```bash
 NOTES_API_TOKEN=dev-token pnpm start
 ```
 
-PowerShell:
+Запуск в PowerShell:
 
 ```powershell
 $env:NOTES_API_TOKEN = "dev-token"
@@ -38,22 +44,67 @@ curl http://localhost:4300/health
 curl -H "Authorization: Bearer dev-token" http://localhost:4300/notes
 ```
 
+Ожидаемый результат:
+
+- `GET /health` возвращает `{"status":"ok","service":"notes-service"}`;
+- `GET /notes` с корректным token возвращает список заметок;
+- `GET /notes` без token возвращает `401`.
+
 ## API
 
-- `GET /health` - статус сервиса.
-- `GET /notes` - список заметок текущего пользователя.
-- `POST /notes` - создать заметку, JSON `{ "title": "...", "content": "...", "tags": ["..."] }`.
-- `GET /notes/:id` - получить заметку.
-- `PATCH /notes/:id` - обновить поля `title`, `content`, `tags`, `archived`.
-- `DELETE /notes/:id` - удалить заметку.
+| Метод | Путь | Назначение | Авторизация |
+| --- | --- | --- | --- |
+| `GET` | `/health` | Проверка живости сервиса | Нет |
+| `GET` | `/notes` | Список заметок текущего пользователя | Да |
+| `POST` | `/notes` | Создание заметки | Да |
+| `GET` | `/notes/:id` | Чтение одной заметки | Да |
+| `PATCH` | `/notes/:id` | Обновление заметки | Да |
+| `DELETE` | `/notes/:id` | Удаление заметки | Да |
 
-Все операции с заметками требуют заголовок `Authorization: Bearer <NOTES_API_TOKEN>`.
+Пример создания заметки:
 
-## Проверка
+```bash
+curl -X POST http://localhost:4300/notes \
+  -H "Authorization: Bearer dev-token" \
+  -H "Content-Type: application/json" \
+  -d "{\"title\":\"План защиты\",\"content\":\"Показать T-01 -> SR-01 -> D-01\",\"tags\":[\"ek1\"]}"
+```
+
+## Проверки
 
 ```bash
 pnpm test
 pnpm typecheck
+pnpm build
+```
+
+Тесты проверяют:
+
+- отказ без bearer token;
+- создание, чтение, обновление и удаление заметки;
+- нормализацию тегов;
+- базовые правила валидации;
+- наличие `X-Content-Type-Options: nosniff`;
+- отказ на некорректный JSON;
+- изоляцию заметок по `ownerId` на уровне хранилища.
+
+## Структура
+
+```text
+src/
+  http.ts      HTTP-маршрутизация, авторизация, JSON-ответы
+  main.ts      точка запуска сервиса
+  store.ts     in-memory хранилище, CRUD и валидация
+  types.ts     типы домена и ошибок
+test/
+  run-tests.ts интеграционные и модульные проверки
+docs/ek1/
+  security-requirements.md требования SR-*
+  threat-model.md          угрозы T-*
+  security-decisions.md    решения D-* и будущие проверки
+  traceability.md          матрица T -> SR -> D -> проверка
+DEFENSE_GUIDE.md           сценарий защиты и ответы на вопросы
+PROJECT.md                 описание продукта, границы и запуска
 ```
 
 ## Материалы EK1
@@ -62,5 +113,16 @@ pnpm typecheck
 - [Требования безопасности](docs/ek1/security-requirements.md)
 - [Модель угроз](docs/ek1/threat-model.md)
 - [Проектные решения безопасности](docs/ek1/security-decisions.md)
+- [Матрица трассировки](docs/ek1/traceability.md)
+- [Гайд для защиты](DEFENSE_GUIDE.md)
 - [CONTRIBUTIONS.md](CONTRIBUTIONS.md)
 - [AI_USAGE.md](AI_USAGE.md)
+
+Основная цепочка для защиты:
+
+```text
+T-01 Unauthorized Note Access
+  -> SR-01 Authentication Required + SR-02 Note Ownership Isolation
+  -> D-01 Token Gate And Owner-Scoped Store
+  -> D-01-V1 / D-01-V2
+```

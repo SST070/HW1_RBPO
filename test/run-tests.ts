@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { AddressInfo } from "node:net";
 import { startNotesServer } from "../src/http.js";
+import { ApiError } from "../src/types.js";
 import { NotesStore, validateTags, validateTitle } from "../src/store.js";
 
 const token = "test-token";
@@ -16,9 +17,19 @@ try {
 
   assert.equal(validateTitle("  Plan "), "Plan");
   assert.deepEqual(validateTags(["Work", "work", "EK1"]), ["work", "ek1"]);
+  assert.throws(() => validateTitle("   "), ApiError);
+
+  const isolatedStore = new NotesStore();
+  const ownerNote = isolatedStore.create("owner-a", {
+    title: "Private",
+    content: "Only owner-a can read this"
+  });
+  assert.equal(isolatedStore.get("owner-a", ownerNote.id).title, "Private");
+  assert.throws(() => isolatedStore.get("owner-b", ownerNote.id), ApiError);
 
   const unauthorized = await fetch(`${baseUrl}/notes`);
   assert.equal(unauthorized.status, 401);
+  assert.equal(unauthorized.headers.get("x-content-type-options"), "nosniff");
 
   const created = await request(baseUrl, "POST", "/notes", {
     title: "Security concept",
@@ -32,6 +43,24 @@ try {
   const listed = await request(baseUrl, "GET", "/notes");
   assert.equal(listed.status, 200);
   assert.equal(listed.body.notes.length, 1);
+  assert.equal(listed.headers.get("x-content-type-options"), "nosniff");
+
+  const invalidTitle = await request(baseUrl, "POST", "/notes", {
+    title: " "
+  });
+  assert.equal(invalidTitle.status, 400);
+  assert.equal(invalidTitle.body.error.code, "validation_error");
+
+  const invalidJson = await fetch(`${baseUrl}/notes`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json"
+    },
+    body: "{bad-json"
+  });
+  assert.equal(invalidJson.status, 400);
+  assert.equal((await invalidJson.json()).error.code, "bad_json");
 
   const updated = await request(baseUrl, "PATCH", `/notes/${created.body.note.id}`, {
     archived: true
@@ -53,7 +82,7 @@ async function request(
   method: string,
   path: string,
   body?: unknown
-): Promise<{ status: number; body: any }> {
+): Promise<{ status: number; headers: Headers; body: any }> {
   const response = await fetch(`${baseUrl}${path}`, {
     method,
     headers: {
@@ -65,6 +94,7 @@ async function request(
 
   return {
     status: response.status,
+    headers: response.headers,
     body: response.status === 204 ? undefined : await response.json()
   };
 }
