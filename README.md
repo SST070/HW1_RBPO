@@ -125,7 +125,7 @@ PROJECT.md                 описание продукта, границы и 
 T-01 Unauthorized Disclosure
   -> SR-01 Authentication Required + SR-02 Note Ownership Isolation
   -> D-01 Token Gate And Owner-Scoped Store
-  -> D-01-V1 / D-01-V4
+  -> D-01-V1 / D-01-V4 / D-01-V5
 ```
 
 Версия для сдачи фиксируется отдельно в `SUBMISSION.md`: преподавателю передается URL репозитория и финальный commit hash или tag `ek1`.

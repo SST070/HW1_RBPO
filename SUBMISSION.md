@@ -7,7 +7,7 @@
 URL:
 
 ```text
-https://github.com/Shkundin/HW1_RBPO
+https://github.com/SST070/HW1_RBPO
 ```
 
 ## Оцениваемая версия
@@ -49,6 +49,7 @@ git status --short
 ## Что передать преподавателю
 
 ```text
-Repository: https://github.com/Shkundin/HW1_RBPO
-Version: <final commit hash> или tag ek1
+Repository: https://github.com/SST070/HW1_RBPO
+Version: tag ek1
+Commit: resolve by `git rev-parse ek1` after the final tag update
 ```
