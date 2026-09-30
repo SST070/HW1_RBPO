@@ -225,12 +225,15 @@ pnpm build
 - [Гайд для защиты](DEFENSE_GUIDE.md)
 - [Вклад участников](CONTRIBUTIONS.md)
 - [Использование ИИ](AI_USAGE.md)
+- [Фиксация версии для сдачи](SUBMISSION.md)
 
 Приоритетная цепочка:
 
 ```text
-T-01 Unauthorized Note Access
+T-01 Unauthorized Disclosure
   -> SR-01 Authentication Required + SR-02 Note Ownership Isolation
   -> D-01 Token Gate And Owner-Scoped Store
-  -> D-01-V1 / D-01-V2
+  -> D-01-V1 / D-01-V4
 ```
+
+Commit hash и tag `ek1` относятся к процессу сдачи EK1 и описаны в `SUBMISSION.md`; они не включены в модель угроз продукта.

@@ -26,10 +26,23 @@ try {
   });
   assert.equal(isolatedStore.get("owner-a", ownerNote.id).title, "Private");
   assert.throws(() => isolatedStore.get("owner-b", ownerNote.id), ApiError);
+  assert.throws(
+    () => isolatedStore.update("owner-b", ownerNote.id, { title: "Changed" }),
+    ApiError
+  );
+  assert.throws(() => isolatedStore.delete("owner-b", ownerNote.id), ApiError);
+  assert.equal(isolatedStore.get("owner-a", ownerNote.id).title, "Private");
 
   const unauthorized = await fetch(`${baseUrl}/notes`);
   assert.equal(unauthorized.status, 401);
   assert.equal(unauthorized.headers.get("x-content-type-options"), "nosniff");
+
+  const wrongToken = await fetch(`${baseUrl}/notes`, {
+    headers: {
+      Authorization: "Bearer wrong-token"
+    }
+  });
+  assert.equal(wrongToken.status, 401);
 
   const created = await request(baseUrl, "POST", "/notes", {
     title: "Security concept",
@@ -50,6 +63,7 @@ try {
   });
   assert.equal(invalidTitle.status, 400);
   assert.equal(invalidTitle.body.error.code, "validation_error");
+  assert.doesNotMatch(JSON.stringify(invalidTitle.body), /at\s+\w+/);
 
   const invalidJson = await fetch(`${baseUrl}/notes`, {
     method: "POST",
@@ -60,7 +74,23 @@ try {
     body: "{bad-json"
   });
   assert.equal(invalidJson.status, 400);
-  assert.equal((await invalidJson.json()).error.code, "bad_json");
+  const invalidJsonBody = await invalidJson.json();
+  assert.equal(invalidJsonBody.error.code, "bad_json");
+  assert.doesNotMatch(JSON.stringify(invalidJsonBody), /at\s+\w+/);
+
+  const oversized = await fetch(`${baseUrl}/notes`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      title: "Too large",
+      content: "x".repeat(33 * 1024)
+    })
+  });
+  assert.equal(oversized.status, 400);
+  assert.equal((await oversized.json()).error.code, "bad_json");
 
   const updated = await request(baseUrl, "PATCH", `/notes/${created.body.note.id}`, {
     archived: true
