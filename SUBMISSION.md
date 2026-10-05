@@ -22,12 +22,13 @@ https://github.com/SST070/HW1_RBPO
 ```bash
 git status --short
 git rev-parse HEAD
-git tag -f ek1
+git tag ek1
 git push origin main
-git push -f origin ek1
+git push origin ek1
 ```
 
-Важно: если tag `ek1` уже был передан преподавателю как оцениваемая версия, перемещать его без согласования нельзя. До передачи преподавателю tag можно обновить на финальный commit.
+Tag `ek1` создаётся только после финальной проверки проекта.
+После передачи версии преподавателю tag не передвигается без согласования.
 
 ## Проверки перед отправкой
 
@@ -51,5 +52,5 @@ git status --short
 ```text
 Repository: https://github.com/SST070/HW1_RBPO
 Version: tag ek1
-Commit: resolve by `git rev-parse ek1` after the final tag update
+Commit: resolve by `git rev-parse ek1` after creating the final tag
 ```

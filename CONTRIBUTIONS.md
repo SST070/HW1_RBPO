@@ -15,7 +15,7 @@
 - Описал проектные решения `D-01` - `D-05`, проверки `D-XX-VY`, counterexample analysis и сравнение Bearer Token vs JWT/Session: `docs/ek1/security-decisions.md`.
 - Составил матрицу трассировки `T-* -> SR-* -> D-* -> Verification`: `docs/ek1/traceability.md`.
 - Подготовил сценарий устной защиты и ответы на адресные вопросы: `DEFENSE_GUIDE.md`.
-- Зафиксировал порядок сдачи, commit hash и tag `ek1`: `SUBMISSION.md`.
+- Подготовил порядок фиксации оцениваемой версии через commit hash / tag `ek1`: `SUBMISSION.md`.
 
 Проверки, выполненные M1:
 
@@ -30,6 +30,6 @@
 - объяснить границу доверия HTTP API;
 - показать, где проверяется bearer token;
 - объяснить различие между `T-01 Unauthorized Disclosure` и `T-10 Unauthorized Modification Or Deletion`;
-- пройти цепочку `T-01 -> SR-01/SR-02 -> D-01 -> D-01-V1/D-01-V4`;
+- пройти цепочку `T-01 -> SR-01/SR-02 -> D-01 -> D-01-V1/D-01-V4/D-01-V5`;
 - объяснить counterexample с `OWNER_ID = "default-user"`;
 - объяснить, почему текущий Bearer Token подходит для EK1 и когда нужен переход на JWT/Session.

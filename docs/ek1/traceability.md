@@ -82,7 +82,7 @@ T-05 Oversized JSON Body
 
 - `D-02-V5`: ограничения на уровне БД;
 - `D-01-V5`: cross-user access isolation на HTTP-уровне после появления настоящей пользовательской identity;
-- `D-03-V1`: тест unexpected error без stack trace;
+- `D-03-V3`: тест unexpected error без stack trace;
 - `D-04-V4`: SQL `UPDATE`/`DELETE` с условием по `owner_id`.
 
 ## 5. Согласованность требований
